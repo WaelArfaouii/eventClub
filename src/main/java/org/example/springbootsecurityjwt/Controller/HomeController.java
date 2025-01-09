@@ -1,10 +1,9 @@
 package org.example.springbootsecurityjwt.Controller;
 
 import org.example.springbootsecurityjwt.models.Event;
-import org.example.springbootsecurityjwt.models.User;
+import org.example.springbootsecurityjwt.request.EventParticipationDTO;
 import org.example.springbootsecurityjwt.services.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -87,7 +86,9 @@ public class HomeController {
     public String getParticipation(Model model) {
         List<Event> events = eventService.getAllEvents();
         model.addAttribute("events", events);
+
         return "participation";
+
     }
 
     @GetMapping("participations")
@@ -98,15 +99,15 @@ public class HomeController {
     }
 
     @PostMapping("/participate/{eventId}")
-    public String participateInEvent(@PathVariable Long eventId, RedirectAttributes redirectAttributes) {
+    public String participateInEvent(@PathVariable Long eventId , RedirectAttributes redirectAttributes) {
         try {
-            eventService.addParticipant(eventId);
+            eventService.addParticipant(eventId);  // Add participant to event
             redirectAttributes.addFlashAttribute("successMessage", "You have successfully participated in the event!");
-            return "redirect:/events";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return null ;
+            redirectAttributes.addFlashAttribute("errorMessage", "You have already participated in the event!");
+            return null;
         }
-          // Redirect to events page after participation
+        return "redirect:/events";  // Redirect to the events page
     }
+
 }

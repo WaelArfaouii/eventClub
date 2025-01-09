@@ -44,8 +44,14 @@ public class User implements UserDetails{
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    @ManyToMany
-    List<Event> eventParticipations = new ArrayList<>();
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "event_participants",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "event_id")
+    )
+    private List<Event> eventParticipations = new ArrayList<>();
+
 
     public User(String username, String email, String password) {
         this.username = username;
@@ -121,5 +127,13 @@ public class User implements UserDetails{
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public List<Event> getEventParticipations() {
+        return eventParticipations;
+    }
+
+    public void setEventParticipations(List<Event> eventParticipations) {
+        this.eventParticipations = eventParticipations;
     }
 }

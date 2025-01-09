@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:layout="http://www.thymeleaf.org" layout:decorate="~{layouts/main_layout.html}">
+<html lang="en" xmlns:layout="http://www.thymeleaf.org" >
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,16 +56,16 @@
         <div class="collapse navbar-collapse" id="navbarScroll">
             <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
                 <li class="nav-item">
-                    <a class="nav-link text-dark" aria-current="page" href="/">Home</a>
+                    <a class="nav-link " aria-current="page" href="/">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text dark" href="/events"> Event</a>
+                    <a class="nav-link " href="/events">Event</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text dark" href="/participation"> Participation </a>
+                    <a class="nav-link " href="/participation">Participation</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text dark" href="/club-dashboard"> Dashboard </a>
+                    <a class="nav-link " href="/club-dashboard">Dashboard</a>
                 </li>
             </ul>
         </div>
@@ -77,19 +77,61 @@
         <!-- Iterate over events -->
         <div class="col-md-4" th:each="event : ${events}">
             <div class="event-card">
-                <!--                <img th:src="${event.imageUrl}" alt="Event Image">-->
+                <!-- <img th:src="${event.imageUrl}" alt="Event Image"> -->
                 <div class="p-3">
                     <h4 th:text="${event.eventName}">Event Name</h4>
                     <p th:text="${event.eventDescription}">Event Description</p>
                     <p><strong>Date:</strong> <span th:text="${event.eventDate}">Date</span></p>
                     <p><strong>Location:</strong> <span th:text="${event.eventLocation}">Location</span></p>
-                    <form th:action="@{/participate/{eventId}(eventId=${event.id})}" method="post">
-                        <button class="btn btn-primary btn-block" type="submit">Participate</button>
-                    </form>
+                    <!-- Dynamically pass event ID as a data attribute -->
+                    <button class="btn btn-primary btn-block participate-btn" th:data-id="${event.id}">Participate</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    // Add event listeners to all Participate buttons
+    document.querySelectorAll('.participate-btn').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const eventId = e.target.getAttribute('data-id');  // Get the eventId from the button's data-id attribute
+            console.log("Participating in event with ID:", eventId);
+
+            e.preventDefault();  // Prevent the default button action
+
+            try {
+                const accessToken = localStorage.getItem('authToken');
+                console.log("accessToken", accessToken);
+
+                // Make POST request to participate in the event using the eventId in the URL
+                const response = await fetch(`/participate/${eventId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`,
+                    }
+                });
+
+                console.log("response", response);
+
+                if (response.ok) {
+                    // Show success message
+                    alert('Successfully registered for the event!');
+                    window.location.href = '/participation'; // Redirect to the events page
+                } else {
+                    const errorMessage = await response.text();
+                    alert('You have already participated in the event!');
+                    console.error('Error response:', errorMessage);
+                }
+            } catch (error) {
+                // Handle network or unexpected errors
+                alert('An error occurred. Please try again.');
+                console.log('Error:', error);
+            }
+        });
+    });
+</script>
+
 </body>
 </html>

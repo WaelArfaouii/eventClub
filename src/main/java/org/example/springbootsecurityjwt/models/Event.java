@@ -37,13 +37,13 @@ public class Event {
     private String eventLocation;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToMany(mappedBy = "eventParticipations", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "eventParticipations", cascade = CascadeType.ALL)
     private List<User> participants = new ArrayList<>();
 
-    private boolean userParticipating = false;
+
 
     public Event() {
     }

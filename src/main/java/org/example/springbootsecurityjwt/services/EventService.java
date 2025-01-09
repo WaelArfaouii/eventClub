@@ -5,6 +5,7 @@ import org.example.springbootsecurityjwt.models.Event;
 import org.example.springbootsecurityjwt.models.User;
 import org.example.springbootsecurityjwt.repositories.EventRepository;
 import org.example.springbootsecurityjwt.repositories.UserRepository;
+import org.example.springbootsecurityjwt.request.EventParticipationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class EventService {
@@ -76,23 +78,76 @@ public class EventService {
     }
 
     public void addParticipant(Long eventId) {
-        User user = this.getConnectedUser() ;
+        // Get the currently authenticated user
+        User user = userRepository.getUserByEmail(this.getConnectedUser());
+
+        // Fetch the event
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
-        // Check if the user is already a participant
+        // Log if the user is already a participant in the event
+        System.out.println(event.getParticipants().contains(user));
+
+        // Check if the user is already a participant in the event
         if (!event.getParticipants().contains(user)) {
+            // Add user to the event's participants list
             event.getParticipants().add(user);
-            eventRepository.save(event);
+
+            // Add event to the user's event participation list
+            user.getEventParticipations().add(event);
+
+            // Persist changes to the event and user in the database
+            eventRepository.save(event);    // Save the event
+            userRepository.save(user);      // Save the user to persist changes
         } else {
             throw new RuntimeException("You are already participating in this event.");
         }
     }
 
-    public User getConnectedUser() {
+
+
+    public String getConnectedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User users = (User) authentication.getPrincipal();
-        return this.userRepository.findById(users.getId()).orElse(null);
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof UserDetails) {
+                return ((UserDetails) principal).getUsername();
+            } else {
+                return principal.toString(); // For cases like OAuth where the principal might be a string
+            }
+        }
+        return null;
     }
+
+    private User getCurrentUser() {
+        String username = this.getConnectedUser(); // This retrieves the authenticated user's username
+        return userRepository.findByEmail(username).orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    /**
+     * Get the participation status for each event
+     */
+    public List<EventParticipationDTO> getParticipations() {
+        // Get the currently authenticated user
+        User currentUser = getCurrentUser();
+
+        // Get all events from the repository
+        List<Event> events = eventRepository.findAll();
+
+        // Convert events into DTO with participation status
+        return events.stream().map(event -> {
+            boolean isParticipated = event.getParticipants().contains(currentUser); // Check if the user is a participant
+            return new EventParticipationDTO(
+                    event.getId(),
+                    event.getEventName(),
+                    event.getEventDescription(),
+                    event.getEventDate().toString(),
+                    event.getEventLocation(),
+                    isParticipated
+            );
+        }).collect(Collectors.toList());
+    }
+
+
 
 }
