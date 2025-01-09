@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Événements du Club</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background: linear-gradient(to right, #4e73df, #1cc88a);
+        }
+
+        .event-card {
+            margin: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-header {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .event-buttons {
+            margin-top: 10px;
+        }
+
+        .event-buttons .btn {
+            margin-right: 10px;
+        }
+
+        .navbar {
+            margin-bottom: 20px;
+        }
+    </style>
+    <script>
+        function confirmDelete() {
+            return confirm("Êtes-vous sûr de vouloir supprimer cet événement ?");
+        }
+    </script>
+</head>
+<body>
+<nav class="navbar navbar-dark bg-dark navbar-expand-lg">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Club Event</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarScroll">
+            <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+                <li class="nav-item">
+                    <a class="nav-link text-dark" aria-current="page" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text dark" href="/events"> Event</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text dark" href="/participation"> Participation </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text dark" href="/club-dashboard"> Dashboard </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <h2 class="text-center">Événements du club</h2>
+
+    <!-- Flash Messages -->
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+    <!-- Event Cards -->
+    <div th:each="event : ${events}" class="event-card">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="event-header" th:text="${event.name}">Event Name</div>
+                <p th:text="${event.description}">Event Description</p>
+                <p>Date: <span th:text="${event.date}">Event Date</span></p>
+                <p>Organisateur: <span th:text="${event.organizer}">Organizer Name</span></p>
+            </div>
+            <div class="col-md-4 text-right">
+                <p>Lieu: <span th:text="${event.location}">Location</span></p>
+                <div class="event-buttons">
+                    <!-- Edit Button -->
+                    <button class="btn btn-warning" th:onclick="'window.location.href=\'/' + ${event.id} + '/edit\''">
+                        Modifier
+                    </button>
+
+                    <!-- Delete Button -->
+                    <form th:action="@{/delete-event/{id}(id=${event.id})}" method="post" onsubmit="return confirmDelete();">
+                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add New Event Button -->
+    <div class="text-center mt-4">
+        <a href="/create" class="btn btn-success">Créer un nouvel événement</a>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS for background color -->
+    <style>
+        body {
+            background-color: #f0f8ff; /* Light blue background */
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="text-center">Login</h1>
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email:</label>
+                            <input type="email" id="email" name="email" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password:</label>
+                            <input type="password" id="password" name="password" class="form-control" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="button" id="loginButton" class="btn btn-success">Login</button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-3">
+                        <p>Don't have an account?
+                            <a href="/register" class="text-decoration-none">Sign up</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('loginButton').addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        // Get email and password input values
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            // Make POST request to sign-in endpoint
+            const response = await fetch('/api/auth/signin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const token = data.token;
+
+                // Store token in localStorage
+                localStorage.setItem('authToken', token);
+
+                alert('Login successful!');
+                console.log('Token stored in localStorage:', token);
+
+                // Get the token from localStorage
+                const accessToken = localStorage.getItem('authToken');
+
+                // Make authorized request to /event endpoint
+                const eventResponse = await fetch('http://localhost:8005/event', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                    }
+                });
+
+                if (eventResponse.ok) {
+                    const eventData = await eventResponse.text();
+                    document.body.innerHTML = eventData
+                  //  window.location.href = '/event';
+                } else {
+                    const errorMessage = await eventResponse.text();
+                    console.error('Error fetching event data:', errorMessage);
+                    alert(`Failed to load event data: ${errorMessage}`);
+                }
+            } else {
+                const errorMessage = await response.text();
+                alert('Login failed! ' + errorMessage);
+                console.error('Error response:', errorMessage);
+            }
+        } catch (error) {
+            // Handle network or unexpected errors
+            alert('An error occurred. Please try again.');
+            console.error('Error:', error);
+        }
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

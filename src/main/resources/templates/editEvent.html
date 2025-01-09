@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier un événement</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background: linear-gradient(to right, #4e73df, #1cc88a);
+        }
+
+        .form-container {
+            margin: 50px auto;
+            padding: 30px;
+            max-width: 600px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-title {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: #4e73df;
+            border-color: #4e73df;
+        }
+
+        .btn-primary:hover {
+            background-color: #3a5bb5;
+            border-color: #3a5bb5;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-dark bg-dark navbar-expand-lg">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Club Event</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarScroll">
+            <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+                <li class="nav-item">
+                    <a class="nav-link text-dark" aria-current="page" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text dark" href="/events"> Event</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text dark" href="/participation"> Participation </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text dark" href="/club-dashboard"> Dashboard </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="form-container">
+        <h2 class="form-title">Modifier un événement</h2>
+        <form th:action="@{/edit-event}" th:object="${event}" method="post">
+            <input type="hidden" name="id" th:value="${event.id}" />
+            <div class="form-group">
+                <label for="eventName">Nom de l'événement</label>
+                <input type="text" class="form-control" id="eventName" name="eventName" th:value="${event.eventName}" required>
+            </div>
+            <div class="form-group">
+                <label for="eventDescription">Description</label>
+                <textarea class="form-control" id="eventDescription" name="eventDescription" rows="3" th:text="${event.eventDescription}" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="eventDate">Date</label>
+                <input type="date" class="form-control" id="eventDate" name="eventDate" th:value="${event.eventDate}" required>
+            </div>
+            <div class="form-group">
+                <label for="organizerName">Organisateur</label>
+                <input type="text" class="form-control" id="organizerName" name="organizerName" th:value="${event.getUser().getUsername()}" required>
+            </div>
+            <div class="form-group">
+                <label for="eventLocation">Lieu</label>
+                <input type="text" class="form-control" id="eventLocation" name="eventLocation" th:value="${event.eventLocation}" required>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                <a href="/eventList" class="btn btn-secondary">Annuler</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>
